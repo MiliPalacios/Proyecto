@@ -13,9 +13,6 @@ selection=st.sidebar.radio("Ir a",list(pages.keys()))
 page=pages[selection]
 st.title("RESUMEN ESTADO DE CUENTA")
 
-# Título de nuestra aplicación
-st.title('Resumen de ESTADO DE CUENTA')
-
 # Subir base desde el computador
 archivo_base = st.file_uploader('Subir base de datos',type=['xlsx'])
 
