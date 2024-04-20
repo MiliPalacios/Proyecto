@@ -1,6 +1,5 @@
 [theme]
-primaryColor="#7DE2DF"
-backgroundColor="#80EAE7"
-secondBackgroundColor="#EAE780"
+primaryColor="#10A9A4"
+backgroundColor="#484AAB"
 textColor="050505"
-font="sans serif"
+font="Times"
