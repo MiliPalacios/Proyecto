@@ -52,17 +52,35 @@ if archivo_base is not None:
         st.subheader('Solo créditos')
         st.write('Esta sección permite observar los ingresos facturados y no facturados')
         st.info("Seccion en CORRECCION")
-        #Eliminar columnas
-        datos_importantes=datos.drop(columns=["Tipo de transacción","Oficina","Concepto","Documento","Saldo","Hora","ORDENANTE","CUENTA ORIGEN","DESCRIPCION BANCO","DETALLE PAGO","BANCO","OBSERVACION","OBSERVACIONES","ESTADO CONTABILIDAD","N. de comprobante","Unnamed: 9"])
 
         #Eliminar valores negativos
-        v_negativos=[]
-        for monto in datos_importantes["Monto"]:
-            if monto<0:
-                indice=list(datos_importantes["Monto"]).index(monto)
-                v_negativos.append(indice)
-        datos_importantes=datos_importantes.drop(index=v_negativos)
+        datos_importantes=datos[datos["Tipo de transacción"].isin(["Crédito"])]
+
+        #Eliminar columnas
+        datos_importantes=datos_importantes.drop(columns=["Tipo de transacción","Oficina","Concepto","Documento","Saldo","Hora","ORDENANTE","CUENTA ORIGEN","DESCRIPCION BANCO","DETALLE PAGO","BANCO","OBSERVACION","OBSERVACIONES","ESTADO CONTABILIDAD","N. de comprobante","Unnamed: 9"])
         st.write(datos_importantes)
+        
+        #GRAFICO FACTURAS VS INGRESOS
+        dias=datos_importantes["Fecha"].unique()
+        x = np.arange(len(dias))
+        ancho=0.25
+        datos_importantes=datos[datos["Tipo de transacción"].isin(["Crédito"])]
+        dias=datos_importantes["Fecha"].unique()
+        ingresos=[]
+        facturado=[]
+        for i in range(len(dias)):
+            dia=dias[i]
+            datos_i=datos_importantes[datos_importantes["Fecha"].isin([dia])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante","Unnamed: 9"])
+            valores_ingresos_i=datos_i["Monto"].sum()
+            valores_facturados_i=datos_i[datos_i["FACTURA"]!=0]["Monto"].sum()
+            ingresos.append(valores_ingresos_i)
+            facturado.append(valores_facturados_i)
+
+        df=pd.DataFrame({
+            "Ingresos" : ingresos,
+            "Facturado": facturado,
+            })
+        st.line_chart(df)
     if opcion=='Ingresos y egresos tototales':
         #Ingresos y egresos totales
         st.subheader('Ingresos y egresos tototales')
@@ -135,12 +153,12 @@ if archivo_base is not None:
         st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
 
 
-#Agregar imagenes
-#img = Image("images/donut_chart_platform.png")
-#ws.add_image(img,"A4")
-#Guardar
+    #Agregar imagenes
+    #img = Image("images/donut_chart_platform.png")
+    #ws.add_image(img,"A4")
+    #Guardar
     #poner graficos en excel
-     #fig=px.histogram(datos,x=pregunta)
+    #fig=px.histogram(datos,x=pregunta)
 
     if opcion=="Reportes en PDF":
         print ("En desarrollo")
