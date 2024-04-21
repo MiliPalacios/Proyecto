@@ -82,7 +82,8 @@ if archivo_base is not None:
         tabla_d=datos_d.pivot_table(index="Tipo de transacción",columns="Fecha", values="Monto", aggfunc= lambda x:sum(x))
         st.write(tabla_d)
         st.write("Aquí se presenta el valor de los montos depositados por cada transacción")
-        st.line_chart(datos_d["Monto"])
+        st.line_chart(datos_d["Monto"])    
+
     if opcion=="Reportes en EXCEL":
         st.title("Reportes en EXCEL")
         st.write("Aquí usted podrá descargar los reportes generados en base a los pagos de cada lote")
@@ -90,13 +91,52 @@ if archivo_base is not None:
         datos=datos.sort_values(by=["LOTE"])
         lotes=datos["LOTE"].unique()
         lote=st.selectbox("Escoja el lote:", lotes)
-       
+
+        wb=Workbook()
+        ws=wb.active
+    
+        ws["E1"]=f"REPORTE DEL LOTE {lote}"
+        ws['E1'].font = Font(name='Amercian Typewriter',size=20,bold=True,italic=True,color='139911')
+        ws.row_dimensions[1].height = 30
+        ws['E1'].alignment = Alignment(horizontal='center',vertical='center')
+
+        datos_lote=datos[datos["LOTE"].isin([lote])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante","Unnamed: 9"])
+
+        list=["B","C","D","E","F","G","H"]
+        for j in range (len(list)):
+            ws.column_dimensions[f'{list[j]}'].width=20
+            ws[f"{list[j]}4"]=datos_lote.columns[j]
+            ws[f"{list[j]}4"].font = Font(name='Times',size=12,bold=True,italic=False,color='243783')
+            ws[f"{list[j]}4"].alignment = Alignment(horizontal='center',vertical='center')
+
+        aux=0
+        for i in range (5,5+len(datos_lote.index)):
+            ws[f"B{i}"]=datos_lote["Fecha"].values[aux]
+            ws[f"B{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"C{i}"]=datos_lote["Hora"].values[aux]
+            ws[f"C{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"D{i}"]=datos_lote["Monto"].values[aux]
+            ws[f"D{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"E{i}"]=datos_lote["ORDENANTE"].values[aux]
+            ws[f"E{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"F{i}"]=datos_lote["FACTURA"].values[aux]
+            ws[f"F{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"G{i}"]=datos_lote["FECHA FACTURA"].values[aux]
+            ws[f"G{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"H{i}"]=datos_lote["MOTIVO"].values[aux]
+            ws[f"H{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            aux+=1
+        #DESCARGAR EL EXCEL
+        excel_file=f.descargar_excel(wb)
+        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx",icon="⬇️")
+
+
+#Agregar imagenes
+#img = Image("images/donut_chart_platform.png")
+#ws.add_image(img,"A4")
+#Guardar
     #poner graficos en excel
      #fig=px.histogram(datos,x=pregunta)
 
-    #DESCARGAR EL EXCEL
-        #excel_file=f.to_excel(df)
-        #st.download_button(
-        #label="Descargar Excel",
-        #data=excel_file,
-        #file_name=f"respuestas_por_genero_{preguntap}_{pregunta}.xlsx",icon="⬇️")
+    if opcion=="Reportes en PDF":
+        print ("En desarrollo")

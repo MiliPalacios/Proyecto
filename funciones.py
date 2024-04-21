@@ -2,8 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font,Color, Alignment,PatternFill,Border
+from openpyxl.drawing import image
 
-#Convertir a excel
+#Convertir a excel un dataframe
 def to_excel(df):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -51,3 +54,9 @@ def lotes_sin_nombre(texto):
     except:
         texto=float(0)
     return texto
+#Descargar reportes en Excel de los LOTES
+def descargar_excel(wb):
+    excel_bytes = BytesIO()
+    wb.save(excel_bytes)
+    excel_bytes.seek(0)
+    return excel_bytes
