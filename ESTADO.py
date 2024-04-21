@@ -4,14 +4,15 @@ import pandas as pd
 from io import BytesIO
 import funciones as f
 from pages import pag1,pag2
+
 from openpyxl import Workbook
 from openpyxl.styles import Font,Color, Alignment,PatternFill,Border
 from openpyxl.drawing import image
 
 st.sidebar.header("Paginas")
 pages={
-    "PDF": pag1,
-    "EXCEL":pag2
+    "Extra1": pag1,
+    "Extra2":pag2
 }
 selection=st.sidebar.radio("Ir a",list(pages.keys()))
 page=pages[selection]
@@ -29,9 +30,9 @@ if archivo_base is not None:
     # Lectura de la base
     datos = pd.read_excel(archivo_base)    
     #Transformar datos de fecha a datos de tiempo
-    for i in range (len(list(datos.index))) :
+    for i in range (len(datos.index)) :
         datos["Fecha"][i]=pd.to_datetime(f.texto_a_fechas(datos["Fecha"][i])) 
-
+    datos=datos.fillna(int("0"))
     st.subheader("La base de datos es:")
     st.write(datos)
     #AGREGAR UN MENU DE OPCIONES
@@ -87,9 +88,12 @@ if archivo_base is not None:
     if opcion=="Reportes en EXCEL":
         st.title("Reportes en EXCEL")
         st.write("Aquí usted podrá descargar los reportes generados en base a los pagos de cada lote")
+
+        st.info("ERROR: datos de tipo tiempo no se pueden convertir a Excel :/ Se descargan las fechas sin el formato #/#/#")
+
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
-        lotes=datos["LOTE"].unique()
+        lotes=list(datos["LOTE"].unique())
         lote=st.selectbox("Escoja el lote:", lotes)
 
         wb=Workbook()
@@ -128,7 +132,7 @@ if archivo_base is not None:
             aux+=1
         #DESCARGAR EL EXCEL
         excel_file=f.descargar_excel(wb)
-        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx",icon="⬇️")
+        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
 
 
 #Agregar imagenes
