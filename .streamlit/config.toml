@@ -1,5 +1,9 @@
 [theme]
-primaryColor="#136A67"
-backgroundColor="#484AAB"
-textColor="#050505"
-font="Times"
+base="dark"
+primaryColor="#E3345E"
+#color de fondo
+backgroundColor="#8585AD"
+#barra de opciones
+secondaryBackgroundColor="#7AD8D4"
+textColor="#050505" 
+font="monospace"
