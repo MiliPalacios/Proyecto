@@ -60,3 +60,4 @@ def descargar_excel(wb):
     wb.save(excel_bytes)
     excel_bytes.seek(0)
     return excel_bytes
+    

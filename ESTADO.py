@@ -56,7 +56,7 @@ if archivo_base is not None:
         datos_importantes=datos[datos["Tipo de transacción"].isin(["Crédito"])]
 
         #Eliminar columnas
-        datos_importantes=datos_importantes.drop(columns=["Tipo de transacción","Oficina","Concepto","Documento","Saldo","Hora","ORDENANTE","CUENTA ORIGEN","DESCRIPCION BANCO","DETALLE PAGO","BANCO","OBSERVACION","OBSERVACIONES","ESTADO CONTABILIDAD","N. de comprobante","Unnamed: 9"])
+        datos_importantes=datos_importantes.drop(columns=["Tipo de transacción","Oficina","Concepto","Documento","Saldo","Hora","ORDENANTE","CUENTA ORIGEN","DESCRIPCION BANCO","DETALLE PAGO","BANCO","OBSERVACION","OBSERVACIONES","ESTADO CONTABILIDAD","N. de comprobante"])
        
         #GRAFICO FACTURAS VS INGRESOS
         dias=datos_importantes["Fecha"].unique()
@@ -68,7 +68,7 @@ if archivo_base is not None:
         facturado=[]
         for i in range(len(dias)):
             dia=dias[i]
-            datos_i=datos_importantes[datos_importantes["Fecha"].isin([dia])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante","Unnamed: 9"])
+            datos_i=datos_importantes[datos_importantes["Fecha"].isin([dia])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
             valores_ingresos_i=datos_i["Monto"].sum()
             valores_facturados_i=datos_i[datos_i["FACTURA"]!=0]["Monto"].sum()
             ingresos.append(valores_ingresos_i)
@@ -94,16 +94,18 @@ if archivo_base is not None:
        #Ingresos y egresos por día     
         st.subheader('TRANSACCIONES')
         st.info("Seccion en CORRECCION: dias 0")
+        st.info("Para ejemplo rápido seleccionar: 2024-01-03")
         fecha=st.selectbox('Seleccione una opción: ', fechas)
         datos_d=datos_i_e[datos_i_e["Fecha"].isin([fecha])]
         tabla_d=datos_d.pivot_table(index="Tipo de transacción",columns="Fecha", values="Monto", aggfunc= lambda x:sum(x))
+        st.write("Totales repecto al tipo de transacción")
         st.write(tabla_d)
         st.write("Aquí se presenta el valor de los montos depositados. Objetivo: identificar valores no usuales en las transacciones")
         st.line_chart(datos_d["Monto"],color="#08FF01")    
         
         st.subheader('INGRESOS VS FACTURAS')
         st.write("Aqui usted puede verificar los ingresos que aun no han sido facturados")
-        datos_dia=datos[datos["Fecha"].isin([fecha])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante","Unnamed: 9"])
+        datos_dia=datos[datos["Fecha"].isin([fecha])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
         datos_dia=datos_dia[datos_dia["Tipo de transacción"].isin(["Crédito"])]
         st.write(datos_dia)
         valores_ingresos_d=datos_dia["Monto"].sum()
@@ -122,23 +124,57 @@ if archivo_base is not None:
         image=Image.open('./images/i_vs_f_dia.png')
         st.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
     if opcion=="Analisis por lote":
-        datos["LOTE"]=datos["LOTE"].apply(lotes_sin_nombre)
+        datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
         lotes=datos["LOTE"].unique()
         lote=st.selectbox("Escoja el lote:", lotes)
-        
-
-
+        #REPORTE POR LOTE
     if opcion=="Reportes en EXCEL":
         st.title("Reportes en EXCEL")
         st.write("Aquí usted podrá descargar los reportes generados en base a los pagos de cada lote")
-
         st.info("ERROR: datos de tipo tiempo no se pueden convertir a Excel :/ Se descargan las fechas sin el formato #/#/#")
 
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
         lotes=list(datos["LOTE"].unique())
         lote=st.selectbox("Escoja el lote:", lotes)
+
+        wb=Workbook()
+        ws=wb.active
+        ws["E1"]=f"REPORTE DEL LOTE {lote}"
+        ws['E1'].font = Font(name='Amercian Typewriter',size=20,bold=True,italic=True,color='139911')
+        ws.row_dimensions[1].height = 30
+        ws['E1'].alignment = Alignment(horizontal='center',vertical='center')
+
+        datos_lote=datos[datos["LOTE"].isin([lote])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
+
+        list=["B","C","D","E","F","G","H"]
+        for j in range (len(list)):
+            ws.column_dimensions[f'{list[j]}'].width=20
+            ws[f"{list[j]}4"]=datos_lote.columns[j]
+            ws[f"{list[j]}4"].font = Font(name='Times',size=12,bold=True,italic=False,color='243783')
+            ws[f"{list[j]}4"].alignment = Alignment(horizontal='center',vertical='center')
+
+        aux=0
+        for i in range (5,5+len(datos_lote.index)):
+            ws[f"B{i}"]=datos_lote["Fecha"].values[aux]
+            ws[f"B{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"C{i}"]=datos_lote["Hora"].values[aux]
+            ws[f"C{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"D{i}"]=datos_lote["Monto"].values[aux]
+            ws[f"D{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"E{i}"]=datos_lote["ORDENANTE"].values[aux]
+            ws[f"E{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"F{i}"]=datos_lote["FACTURA"].values[aux]
+            ws[f"F{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"G{i}"]=datos_lote["FECHA FACTURA"].values[aux]
+            ws[f"G{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            ws[f"H{i}"]=datos_lote["MOTIVO"].values[aux]
+            ws[f"H{i}"].alignment = Alignment(horizontal='center',vertical='center')
+            aux+=1
+        #DESCARGAR EL EXCEL
+        excel_file=f.descargar_excel(wb)
+        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
 
        
 
