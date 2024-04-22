@@ -1,7 +1,8 @@
 import streamlit as st
+
 def page():
-    st.title("Obtener IMAGENES")
-    st.write("Aquí se visualizará de mejor manera la información relativa a LOTES")
+    st.title("Pagina en desarrollo")
+    st.write("Descripción breve")
 
 if __name__=="__main__":
     page()

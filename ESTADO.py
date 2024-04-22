@@ -18,8 +18,8 @@ pages={
 selection=st.sidebar.radio("Ir a",list(pages.keys()))
 page=pages[selection]
 st.title("RESUMEN ESTADO DE CUENTA")
-st.write("Aquí podrá encontrar varias herramientas para dar un vistazo más detallado a la información dada")
-
+st.write("Esta app fue hecha con el fin de facilitar los procedimientos internos en la tesoreria de un conjunto de residencias")
+st.warning("APP AUN DESARROLLANDOSE: no exite contenido en las paginas anexas")
 # Subir base desde el computador
 try:
     archivo_base = st.file_uploader('Subir base de datos',type=['xlsx'])
