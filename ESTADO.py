@@ -10,6 +10,7 @@ from openpyxl.styles import Font, Color, Alignment, PatternFill, Border
 from openpyxl.drawing.image import Image as image
 from PIL import Image
 from fpdf import FPDF
+import base64
 st.sidebar.header("Paginas")
 pages={
     "Extra1": pag1,
@@ -301,5 +302,10 @@ if archivo_base is not None:
         pdf.set_y(275)
         pdf.set_font("Times",style="I",size=14)#Arial, Times, Courier
         pdf.cell(0,0,"¡Juntos trabajamos por el bienestar!",0,1,"C")
-        #st.download_button(label="Descargar Excel",data=pdf,file_name=f"Reporte_lote_{lote}.pdf")
-        pdf.output(f"reportes/Reporte_lote_{lote}.pdf")
+        def create_download_link(val, filename):
+            b64 = base64.b64encode(val)
+            return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Descargar reporte en PDF</a>'
+        html=create_download_link(pdf.output(dest="S").encode("latin-1"), f"reportes/Reporte_lote_{lote}")
+        st.divider()
+        col_1,col_2 = st.columns(2)
+        col_1.markdown(html, unsafe_allow_html=True)
