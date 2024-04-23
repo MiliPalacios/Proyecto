@@ -6,8 +6,8 @@ import funciones as f
 from pages import pag1,pag2
 import matplotlib.pyplot as plt
 from openpyxl import Workbook
-from openpyxl.styles import Font,Color, Alignment,PatternFill,Border
-from openpyxl.drawing import image
+from openpyxl.styles import Font, Color, Alignment, PatternFill, Border
+from openpyxl.drawing.image import Image as image
 from PIL import Image
 from fpdf import FPDF
 st.sidebar.header("Paginas")
@@ -86,7 +86,6 @@ if archivo_base is not None:
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
         tabla_i_e=datos_i_e.pivot_table(index="Tipo de transacción", values="Monto", aggfunc= lambda x:sum(x))
         st.write(tabla_i_e)
-  
     if opcion=='Analisis por dia':
         #Ingresos y egresos por día     
         fechas=datos["Fecha"].unique()
@@ -123,6 +122,7 @@ if archivo_base is not None:
         plt.savefig('images/i_vs_f_dia.png')
         image=Image.open('./images/i_vs_f_dia.png')
         st.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
+
     if opcion=="Analisis por lote":
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
@@ -181,12 +181,9 @@ if archivo_base is not None:
             ws[f"H{i}"]=datos_lote["MOTIVO"].values[aux]
             ws[f"H{i}"].alignment = Alignment(horizontal='center',vertical='center')
             aux+=1
-    #Agregar imagenes
-    #img = Image("images/donut_chart_platform.png")
-    #ws.add_image(img,"A4")
-    #Guardar
-    #poner graficos en excel
-    #fig=px.histogram(datos,x=pregunta)
+        #Agregar imagenes
+        #img = image('images/i_vs_f_lote.png')
+        #ws.add_image(img,"B10")
         #DESCARGAR EL EXCEL
         excel_file=f.descargar_excel(wb)
         st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
@@ -268,7 +265,7 @@ if archivo_base is not None:
         pdf.cell(0,0,"Contacto:",0,1)
 
         #Grafico
-        pdf.image(f'images/i_vs_f_lote.png',x=50,y=200,w=120,h=65)
+        pdf.image(f'images/i_vs_f_lote.png',x=91,y=100,w=120,h=65)
         #Encabezado tabla
         pdf.set_y(170)
         pdf.set_x(20)
@@ -305,4 +302,4 @@ if archivo_base is not None:
         pdf.set_font("Times",style="I",size=14)#Arial, Times, Courier
         pdf.cell(0,0,"¡Juntos trabajamos por el bienestar!",0,1,"C")
         #st.download_button(label="Descargar Excel",data=pdf,file_name=f"Reporte_lote_{lote}.pdf")
-        pdf.output(f"Reporte_lote_{lote}.pdf")
+        pdf.output(f"reportes/Reporte_lote_{lote}.pdf")
