@@ -5,7 +5,6 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import Font,Color, Alignment,PatternFill,Border
 from openpyxl.drawing import image
-
 #Convertir a excel un dataframe
 def to_excel(df):
     output = BytesIO()
@@ -60,4 +59,3 @@ def descargar_excel(wb):
     wb.save(excel_bytes)
     excel_bytes.seek(0)
     return excel_bytes
-    

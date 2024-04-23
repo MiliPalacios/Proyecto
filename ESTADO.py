@@ -9,7 +9,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font,Color, Alignment,PatternFill,Border
 from openpyxl.drawing import image
 from PIL import Image
-
+from fpdf import FPDF
 st.sidebar.header("Paginas")
 pages={
     "Extra1": pag1,
@@ -187,4 +187,110 @@ if archivo_base is not None:
     #fig=px.histogram(datos,x=pregunta)
 
     if opcion=="Reportes en PDF":
+        class PDFWithBackground(FPDF):
+            def __init__(self):
+                super().__init__()
+                self.background = None
+
+            def set_background(self, image_path):
+                self.background = image_path
+
+            def add_page(self, orientation=''):
+                super().add_page(orientation)
+                if self.background:
+                    self.image(self.background, 0, 0, self.w, self.h)
+
+            def footer(self):
+                # Posición a 1.5 cm desde el fondo
+                self.set_y(-15)
+                # Configurar la fuente para el pie de página
+                self.set_font('Arial', 'I', 8)
+                # Número de página
+                self.cell(0, 10, 'Página ' + str(self.page_no()), 0, 0, 'C')
+
+        pdf=PDFWithBackground()
+        #Encabezado pagina
+        pdf.set_background("images/background.jpeg")
+        pdf.add_page()
+        pdf.set_y(10)
+        pdf.set_font("Times",size=10)#Arial, Times, Courier
+        pdf.cell(0,0,"RESUMEN AUTOMÁTICO",0,1,"L")
+
+        pdf.set_y(10)
+        pdf.set_x(90)
+        pdf.set_font("Times",style="I",size=10)#Arial, Times, Courier
+        pdf.cell(0,0,"Elaborado por: Milena Palacios",0,1)
+
+        pdf.set_y(22)
+        pdf.set_x(15)
+        pdf.set_font("Times",style="B",size=13)#Arial, Times, Courier
+        pdf.cell(0,0,"URBANIZACIÓN DEL EJÉRCITO NACIONAL",0,1)
+
+        pdf.set_y(40)
+        pdf.set_x(20)
+        pdf.set_font("Times",style="B",size=55)#Arial, Times, Courier
+        pdf.cell(0,0,f"LOTE {lote}",0,1)
+
+        pdf.set_y(55)
+        pdf.set_x(25)
+        pdf.set_font("Times",style="B",size=11)#Arial, Times, Courier
+        pdf.cell(0,0,"INFORMACIÓN GENERAL (en desarrollo)",0,1)
+
+        pdf.set_y(65)
+        pdf.set_x(10)
+        pdf.set_font("Times",size=12)#Arial, Times, Courier
+        pdf.cell(0,0,"Ubicación:",0,1)
+
+        pdf.set_y(70)
+        pdf.set_x(10)
+        pdf.set_font("Times",size=12)#Arial, Times, Courier
+        pdf.cell(0,0,"Residente:",0,1)
+
+        pdf.set_y(75)
+        pdf.set_x(10)
+        pdf.set_font("Times",size=12)#Arial, Times, Courier
+        pdf.cell(0,0,"CI:",0,1)
+
+        pdf.set_y(80)
+        pdf.set_x(10)
+        pdf.set_font("Times",size=12)#Arial, Times, Courier
+        pdf.cell(0,0,"Correo:",0,1)
+
+        pdf.set_y(85)
+        pdf.set_x(10)
+        pdf.set_font("Times",size=12)#Arial, Times, Courier
+        pdf.cell(0,0,"Contacto:",0,1)
+
+
+        #Grafico
+        pdf.image(f'images/i_vs_f_lote_{lote}.png',x=50,y=200,w=120,h=65)
+
+        #Encabezado tabla
+        pdf.set_y(170)
+        pdf.set_x(25)
+        pdf.cell(w=35,h=10,txt="Fecha",border=1, align="C",fill=0)
+        pdf.cell(w=20,h=10,txt="Hora",border=1, align="C",fill=0)
+        pdf.cell(w=20,h=10,txt="Monto",border=1, align="C",fill=0)
+        pdf.cell(w=70,h=10,txt="ORDENANTE",border=1, align="C",fill=0)
+        pdf.cell(w=35,h=10,txt="FACTURA",border=1, align="C",fill=0)
+
+        #DATOS TABLA
+        pdf.set_y(180)
+        pdf.set_x(25)
+        new_posicion=180
+        altura=8
+        for i in range (len(datos_lote.index)):
+            pdf.cell(w=35,h=altura,txt=str(pd.to_datetime(datos_lote["Fecha"].values[i])),border=1, align="C",fill=0)
+            pdf.cell(w=20,h=altura,txt=str(datos_lote["Hora"].values[i]),border=1, align="C",fill=0)
+            pdf.cell(w=20,h=altura,txt=str(datos_lote["Monto"].values[i]),border=1, align="C",fill=0)
+            pdf.cell(w=70,h=altura,txt=str(datos_lote["ORDENANTE"].values[i]),border=1, align="C",fill=0)
+            pdf.cell(w=35,h=altura,txt=str(datos_lote["FACTURA"].values[i]),border=1, align="C",fill=0)
+            new_posicion= new_posicion + altura
+            pdf.set_y(new_posicion)
+            pdf.set_x(25)
+        pdf.set_y(275)
+        pdf.set_font("Times",style="I",size=14)#Arial, Times, Courier
+        pdf.cell(0,0,"¡Juntos trabajamos por el bienestar!",0,1,"C")
+        st.download_button(label="Descargar Excel",data=pdf,file_name=f"Reporte_lote_{lote}.pdf")
+
         print ("En desarrollo")
