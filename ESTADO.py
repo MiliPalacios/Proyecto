@@ -302,6 +302,7 @@ if archivo_base is not None:
         pdf.set_y(275)
         pdf.set_font("Times",style="I",size=14)#Arial, Times, Courier
         pdf.cell(0,0,"¡Juntos trabajamos por el bienestar!",0,1,"C")
+        #Descargar PDF
         def create_download_link(val, filename):
             b64 = base64.b64encode(val)
             return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Descargar reporte en PDF</a>'
