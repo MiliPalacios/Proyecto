@@ -157,7 +157,7 @@ if archivo_base is not None:
 
         aux=0
         for i in range (5,5+len(datos_lote.index)):
-            ws[f"B{i}"]=datos_lote["Fecha"].values[aux]
+            ws[f"B{i}"]=str(pd.to_datetime(datos_lote["Fecha"].values[aux]))
             ws[f"B{i}"].alignment = Alignment(horizontal='center',vertical='center')
             ws[f"C{i}"]=datos_lote["Hora"].values[aux]
             ws[f"C{i}"].alignment = Alignment(horizontal='center',vertical='center')
@@ -167,7 +167,7 @@ if archivo_base is not None:
             ws[f"E{i}"].alignment = Alignment(horizontal='center',vertical='center')
             ws[f"F{i}"]=datos_lote["FACTURA"].values[aux]
             ws[f"F{i}"].alignment = Alignment(horizontal='center',vertical='center')
-            ws[f"G{i}"]=datos_lote["FECHA FACTURA"].values[aux]
+            ws[f"G{i}"]=str(pd.to_datetime(datos_lote["FECHA FACTURA"].values[aux]))
             ws[f"G{i}"].alignment = Alignment(horizontal='center',vertical='center')
             ws[f"H{i}"]=datos_lote["MOTIVO"].values[aux]
             ws[f"H{i}"].alignment = Alignment(horizontal='center',vertical='center')
