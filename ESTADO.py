@@ -130,6 +130,25 @@ if archivo_base is not None:
         lote=st.selectbox("Escoja el lote:", lotes)
         datos_lote=datos[datos["Tipo de transacción"]!= "Débito"]
         datos_lote=datos_lote[datos_lote["LOTE"].isin([lote])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
+        #Graficos
+        valores_ingresos_l=datos_lote["Monto"].sum()
+        facturas_l=datos_lote[datos_lote["FACTURA"]!=0]
+        valores_facturados_l=facturas_l["Monto"].sum()
+        y1=[valores_ingresos_l,valores_facturados_l]
+        x1=[1,2]
+        plt.figure(figsize=(10, 6))
+        plt.title(f"CONTROL DEL REGISTRO DE INGRESOS LOTE {lote}")
+        barras1=plt.bar(x1,y1,width=0.8,edgecolor="k",color=["g","b"])
+        plt.ylabel('Cantidad')
+        plt.xticks([1,2],["INGRESOS","FACTURAS"])
+        for barra in barras1:
+            altura = barra.get_height()
+            plt.text(barra.get_x()+barra.get_width()/2, altura/2, altura, ha = 'center',va="bottom")
+        plt.savefig(f'images/i_vs_f_lote.png')
+        plt.show()
+        image=Image.open('./images/i_vs_f_lote.png')
+        st.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
+
         #Análisis EXCEL
         wb=Workbook()
         ws=wb.active
@@ -249,8 +268,7 @@ if archivo_base is not None:
         pdf.cell(0,0,"Contacto:",0,1)
 
         #Grafico
-        #pdf.image(f'images/i_vs_f_lote_{lote}.png',x=50,y=200,w=120,h=65)
-
+        pdf.image(f'images/i_vs_f_lote.png',x=50,y=200,w=120,h=65)
         #Encabezado tabla
         pdf.set_y(170)
         pdf.set_x(20)
