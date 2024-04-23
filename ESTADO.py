@@ -37,7 +37,7 @@ if archivo_base is not None:
     st.subheader("La base de datos es:")
     st.write(datos)
     #AGREGAR UN MENU DE OPCIONES
-    opciones=['Analisis general',"Analisis por lote",'Analisis por dia',"Reportes en EXCEL","Reportes en PDF",'Filtrar información']
+    opciones=['Analisis general',"Analisis por lote",'Analisis por dia','Filtrar información']
     opcion = st.selectbox('¿Qué deseas hacer?',opciones)
     if opcion=='Filtrar información':
         #FILTRAR INFORMACION POR CLASES EN COLUMNAS
@@ -126,35 +126,25 @@ if archivo_base is not None:
     if opcion=="Analisis por lote":
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
-        lotes=datos["LOTE"].unique()
-        lote=st.selectbox("Escoja el lote:", lotes)
-        #REPORTE POR LOTE
-    if opcion=="Reportes en EXCEL":
-        st.title("Reportes en EXCEL")
-        st.write("Aquí usted podrá descargar los reportes generados en base a los pagos de cada lote")
-        st.info("ERROR: datos de tipo tiempo no se pueden convertir a Excel :/ Se descargan las fechas sin el formato #/#/#")
-
-        datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
-        datos=datos.sort_values(by=["LOTE"])
         lotes=list(datos["LOTE"].unique())
         lote=st.selectbox("Escoja el lote:", lotes)
-
+        datos_lote=datos[datos["Tipo de transacción"]!= "Débito"]
+        datos_lote=datos_lote[datos_lote["LOTE"].isin([lote])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
+        #Análisis EXCEL
         wb=Workbook()
         ws=wb.active
         ws["E1"]=f"REPORTE DEL LOTE {lote}"
         ws['E1'].font = Font(name='Amercian Typewriter',size=20,bold=True,italic=True,color='139911')
         ws.row_dimensions[1].height = 30
-        ws['E1'].alignment = Alignment(horizontal='center',vertical='center')
-
-        datos_lote=datos[datos["LOTE"].isin([lote])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Tipo de transacción","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
-
+        ws['E1'].alignment = Alignment(horizontal='center',vertical='center')    
         list=["B","C","D","E","F","G","H"]
+        #Encabezado tabla
         for j in range (len(list)):
             ws.column_dimensions[f'{list[j]}'].width=20
             ws[f"{list[j]}4"]=datos_lote.columns[j]
             ws[f"{list[j]}4"].font = Font(name='Times',size=12,bold=True,italic=False,color='243783')
             ws[f"{list[j]}4"].alignment = Alignment(horizontal='center',vertical='center')
-
+        #Datos Tabla
         aux=0
         for i in range (5,5+len(datos_lote.index)):
             ws[f"B{i}"]=str(pd.to_datetime(datos_lote["Fecha"].values[aux]))
@@ -172,42 +162,39 @@ if archivo_base is not None:
             ws[f"H{i}"]=datos_lote["MOTIVO"].values[aux]
             ws[f"H{i}"].alignment = Alignment(horizontal='center',vertical='center')
             aux+=1
-        #DESCARGAR EL EXCEL
-        excel_file=f.descargar_excel(wb)
-        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
-
-       
-
-
     #Agregar imagenes
     #img = Image("images/donut_chart_platform.png")
     #ws.add_image(img,"A4")
     #Guardar
     #poner graficos en excel
     #fig=px.histogram(datos,x=pregunta)
-
-    if opcion=="Reportes en PDF":
+        #DESCARGAR EL EXCEL
+        excel_file=f.descargar_excel(wb)
+        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
+        
+        #Reporte en PDF
+        #Funciones principales
         class PDFWithBackground(FPDF):
-            def __init__(self):
-                super().__init__()
-                self.background = None
+                    def __init__(self):
+                        super().__init__()
+                        self.background = None
 
-            def set_background(self, image_path):
-                self.background = image_path
+                    def set_background(self, image_path):
+                        self.background = image_path
 
-            def add_page(self, orientation=''):
-                super().add_page(orientation)
-                if self.background:
-                    self.image(self.background, 0, 0, self.w, self.h)
+                    def add_page(self, orientation=''):
+                        super().add_page(orientation)
+                        if self.background:
+                            self.image(self.background, 0, 0, self.w, self.h)
 
-            def footer(self):
-                # Posición a 1.5 cm desde el fondo
-                self.set_y(-15)
-                # Configurar la fuente para el pie de página
-                self.set_font('Arial', 'I', 8)
-                # Número de página
-                self.cell(0, 10, 'Página ' + str(self.page_no()), 0, 0, 'C')
-
+                    def footer(self):
+                        # Posición a 1.5 cm desde el fondo
+                        self.set_y(-15)
+                        # Configurar la fuente para el pie de página
+                        self.set_font('Arial', 'I', 8)
+                        # Número de página
+                        self.cell(0, 10, 'Página ' + str(self.page_no()), 0, 0, 'C')
+        #Crear el PDF
         pdf=PDFWithBackground()
         #Encabezado pagina
         pdf.set_background("images/background.jpeg")
@@ -261,36 +248,43 @@ if archivo_base is not None:
         pdf.set_font("Times",size=12)#Arial, Times, Courier
         pdf.cell(0,0,"Contacto:",0,1)
 
-
         #Grafico
-        pdf.image(f'images/i_vs_f_lote_{lote}.png',x=50,y=200,w=120,h=65)
+        #pdf.image(f'images/i_vs_f_lote_{lote}.png',x=50,y=200,w=120,h=65)
 
         #Encabezado tabla
         pdf.set_y(170)
-        pdf.set_x(25)
+        pdf.set_x(20)
+        pdf.set_font("Times",style="B",size=15)
         pdf.cell(w=35,h=10,txt="Fecha",border=1, align="C",fill=0)
         pdf.cell(w=20,h=10,txt="Hora",border=1, align="C",fill=0)
         pdf.cell(w=20,h=10,txt="Monto",border=1, align="C",fill=0)
-        pdf.cell(w=70,h=10,txt="ORDENANTE",border=1, align="C",fill=0)
+        pdf.cell(w=75,h=10,txt="ORDENANTE",border=1, align="C",fill=0)
         pdf.cell(w=35,h=10,txt="FACTURA",border=1, align="C",fill=0)
 
         #DATOS TABLA
-        pdf.set_y(180)
-        pdf.set_x(25)
         new_posicion=180
+        pdf.set_y(new_posicion)
+        pdf.set_x(20)
         altura=8
         for i in range (len(datos_lote.index)):
+            pdf.set_font("Times",size=10)
             pdf.cell(w=35,h=altura,txt=str(pd.to_datetime(datos_lote["Fecha"].values[i])),border=1, align="C",fill=0)
             pdf.cell(w=20,h=altura,txt=str(datos_lote["Hora"].values[i]),border=1, align="C",fill=0)
             pdf.cell(w=20,h=altura,txt=str(datos_lote["Monto"].values[i]),border=1, align="C",fill=0)
-            pdf.cell(w=70,h=altura,txt=str(datos_lote["ORDENANTE"].values[i]),border=1, align="C",fill=0)
+            pdf.cell(w=75,h=altura,txt=str(datos_lote["ORDENANTE"].values[i]),border=1, align="C",fill=0)
             pdf.cell(w=35,h=altura,txt=str(datos_lote["FACTURA"].values[i]),border=1, align="C",fill=0)
             new_posicion= new_posicion + altura
-            pdf.set_y(new_posicion)
-            pdf.set_x(25)
+            #Poner información conjunta
+            if new_posicion<=270:
+                pdf.set_y(new_posicion)
+                pdf.set_x(20)
+            else:
+                new_posicion=10
+                pdf.add_page()
+                pdf.set_y(new_posicion)
+                pdf.set_x(20)
         pdf.set_y(275)
         pdf.set_font("Times",style="I",size=14)#Arial, Times, Courier
         pdf.cell(0,0,"¡Juntos trabajamos por el bienestar!",0,1,"C")
-        st.download_button(label="Descargar Excel",data=pdf,file_name=f"Reporte_lote_{lote}.pdf")
-
-        print ("En desarrollo")
+        #st.download_button(label="Descargar Excel",data=pdf,file_name=f"Reporte_lote_{lote}.pdf")
+        pdf.output(f"Reporte_lote_{lote}.pdf")
