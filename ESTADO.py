@@ -22,25 +22,26 @@ st.title("RESUMEN ESTADO DE CUENTA")
 st.write("Esta app fue hecha con el fin de facilitar los procedimientos internos en la tesoreria de un conjunto de residencias")
 st.warning("APP AUN DESARROLLANDOSE: no exite contenido en las paginas anexas")
 # Subir base desde el computador
-try:
-    archivo_base = st.file_uploader('Subir base de datos',type=['xlsx'])
-except:
-    st.warning("Se debe subir un archivo de EXCEL",icon="🔴")
+#try:
+#    archivo_base = st.file_uploader('Subir base de datos',type=['xlsx'])
+#except:
+#    st.warning("Se debe subir un archivo de EXCEL",icon="🔴")
     
-if archivo_base is not None:
-    st.success("Archivo subido correctamente",icon="✅")
+#if archivo_base is not None:
+#    st.success("Archivo subido correctamente",icon="✅")
     # Lectura de la base
-    datos = pd.read_excel(archivo_base)    
+#    datos = pd.read_excel(archivo_base)    
     #Transformar datos de fecha a datos de tiempo
-    for i in range (len(datos.index)) :
-        datos["Fecha"][i]=pd.to_datetime(f.texto_a_fechas(datos["Fecha"][i])) 
-    datos=datos.fillna(int("0"))
-    st.subheader("La base de datos es:")
-    st.write(datos)
+datos=pd.read_excel("datasets\Movimiento.xlsx")
+for i in range (len(datos.index)) :
+    datos["Fecha"][i]=pd.to_datetime(f.texto_a_fechas(datos["Fecha"][i])) 
+datos=datos.fillna(int("0"))
+st.subheader("La base de datos es:")
+st.write(datos)
     #AGREGAR UN MENU DE OPCIONES
-    opciones=['Analisis general',"Analisis por lote",'Analisis por dia','Filtrar información']
-    opcion = st.selectbox('¿Qué deseas hacer?',opciones)
-    if opcion=='Filtrar información':
+opciones=['Analisis general',"Analisis por lote",'Analisis por dia','Filtrar información']
+opcion = st.selectbox('¿Qué deseas hacer?',opciones)
+if opcion=='Filtrar información':
         #FILTRAR INFORMACION POR CLASES EN COLUMNAS
         st.subheader('Filtrar información')
         columnas=list(datos.columns)
@@ -49,7 +50,8 @@ if archivo_base is not None:
         valor = st.selectbox('Selecciona una opción',valores)
         datos_f=datos[datos[columna]==valor]
         st.write(datos_f)
-    if opcion=='Analisis general':
+if opcion=='Analisis general':
+        col1,col2=st.columns(2)
         #Data frame depurado
         st.subheader('INGRESOS VS FACTURAS')
         st.write('A continuación se presenta una gráfica de los montos facturados y no facturados. Objetivo: dar un vistazo general al movimiento de ADMINISTRACIÓN.')
@@ -81,13 +83,13 @@ if archivo_base is not None:
             })
         st.line_chart(df,color=["#F50404","#002EB1"])
         st.write("En caso de existir inconsistencias, revisar el dataframe a continuación:")
-        st.write(datos_importantes)
+        col1.st.write(datos_importantes)
 
         st.subheader('INGRESOS VS EGRESOS')
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
         tabla_i_e=datos_i_e.pivot_table(index="Tipo de transacción", values="Monto", aggfunc= lambda x:sum(x))
-        st.write(tabla_i_e)
-    if opcion=='Analisis por dia':
+        col2.st.write(tabla_i_e)
+if opcion=='Analisis por dia':
         #Ingresos y egresos por día     
         fechas=datos["Fecha"].unique()
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
@@ -123,8 +125,7 @@ if archivo_base is not None:
         plt.savefig('images/i_vs_f_dia.png')
         image=Image.open('./images/i_vs_f_dia.png')
         st.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
-
-    if opcion=="Analisis por lote":
+if opcion=="Analisis por lote":
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
         lotes=list(datos["LOTE"].unique())
