@@ -51,7 +51,6 @@ if opcion=='Filtrar información':
         datos_f=datos[datos[columna]==valor]
         st.write(datos_f)
 if opcion=='Analisis general':
-        col1,col2=st.columns(2)
         #Data frame depurado
         st.subheader('INGRESOS VS FACTURAS')
         st.write('A continuación se presenta una gráfica de los montos facturados y no facturados. Objetivo: dar un vistazo general al movimiento de ADMINISTRACIÓN.')
@@ -82,34 +81,36 @@ if opcion=='Analisis general':
             "Facturado": facturado,
             })
         st.line_chart(df,color=["#F50404","#002EB1"])
-        st.write("En caso de existir inconsistencias, revisar el dataframe a continuación:")
-        col1.st.write(datos_importantes)
+        col1,col2=st.columns(2)
+        col1.write("En caso de existir inconsistencias, revisar el dataframe a continuación:")
+        col1.write(datos_importantes)
 
-        st.subheader('INGRESOS VS EGRESOS')
+        col2.subheader('INGRESOS VS EGRESOS')
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
         tabla_i_e=datos_i_e.pivot_table(index="Tipo de transacción", values="Monto", aggfunc= lambda x:sum(x))
-        col2.st.write(tabla_i_e)
+        col2.write(tabla_i_e)
 if opcion=='Analisis por dia':
         #Ingresos y egresos por día     
         fechas=datos["Fecha"].unique()
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
-       #Ingresos y egresos por día     
-        st.subheader('TRANSACCIONES')
-        st.info("Seccion en CORRECCION: dias 0")
-        st.info("Para ejemplo rápido seleccionar: 2024-01-03")
         fecha=st.selectbox('Seleccione una opción: ', fechas)
+        col1,col2=st.columns(2)
+       #Ingresos y egresos por día     
+        col1.subheader('TRANSACCIONES')
+        col1.info("Seccion en CORRECCION: dias 0")
+        col1.info("Para ejemplo rápido seleccionar: 2024-01-03")
         datos_d=datos_i_e[datos_i_e["Fecha"].isin([fecha])]
         tabla_d=datos_d.pivot_table(index="Tipo de transacción",columns="Fecha", values="Monto", aggfunc= lambda x:sum(x))
-        st.write("Totales repecto al tipo de transacción")
-        st.write(tabla_d)
-        st.write("Aquí se presenta el valor de los montos depositados. Objetivo: identificar valores no usuales en las transacciones")
-        st.line_chart(datos_d["Monto"],color="#08FF01")    
+        col1.write("Totales repecto al tipo de transacción")
+        col1.write(tabla_d)
+        col1.write("Aquí se presenta el valor de los montos depositados. Objetivo: identificar valores no usuales en las transacciones")
+        col1.line_chart(datos_d["Monto"],color="#08FF01")    
         
-        st.subheader('INGRESOS VS FACTURAS')
-        st.write("Aqui usted puede verificar los ingresos que aun no han sido facturados")
+        col2.subheader('INGRESOS VS FACTURAS')
+        col2.write("Aqui usted puede verificar los ingresos que aun no han sido facturados")
         datos_dia=datos[datos["Fecha"].isin([fecha])].drop(columns=["LOTE","MES","ESTADO CONTABILIDAD","CUENTA ORIGEN","DESCRIPCION BANCO","OBSERVACIONES","OBSERVACION","Oficina","Concepto","Documento","Saldo","DETALLE PAGO","BANCO","N. de comprobante"])
         datos_dia=datos_dia[datos_dia["Tipo de transacción"].isin(["Crédito"])]
-        st.write(datos_dia)
+        col2.write(datos_dia)
         valores_ingresos_d=datos_dia["Monto"].sum()
         valores_facturados_d=datos_dia[datos_dia["FACTURA"]!=0]["Monto"].sum()
         y2=[valores_ingresos_d,valores_facturados_d]
@@ -124,7 +125,7 @@ if opcion=='Analisis por dia':
             plt.text(barra.get_x()+barra.get_width()/2, altura/2, altura, ha = 'center',va="bottom")
         plt.savefig('images/i_vs_f_dia.png')
         image=Image.open('./images/i_vs_f_dia.png')
-        st.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
+        col2.image(image,caption="Objetivo: dar un vistazo más cercano a las actualizaciones de ADMINISTRACIÓN.")
 if opcion=="Analisis por lote":
         datos["LOTE"]=datos["LOTE"].apply(f.lotes_sin_nombre)
         datos=datos.sort_values(by=["LOTE"])
