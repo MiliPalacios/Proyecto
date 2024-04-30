@@ -187,9 +187,11 @@ if opcion=="Analisis por lote":
         #Agregar imagenes
         #img = image('images/i_vs_f_lote.png')
         #ws.add_image(img,"B10")
+        st.divider()
+        col1,col2 = st.columns(2)
         #DESCARGAR EL EXCEL
         excel_file=f.descargar_excel(wb)
-        st.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
+        col2.download_button(label="Descargar Excel",data=excel_file,file_name=f"Reporte_lote_{lote}.xlsx")
         
         #Reporte en PDF
         #Funciones principales
@@ -309,6 +311,4 @@ if opcion=="Analisis por lote":
             b64 = base64.b64encode(val)
             return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Descargar reporte en PDF</a>'
         html=create_download_link(pdf.output(dest="S").encode("latin-1"), f"reportes/Reporte_lote_{lote}")
-        st.divider()
-        col_1,col_2 = st.columns(2)
-        col_1.markdown(html, unsafe_allow_html=True)
+        col1.markdown(html, unsafe_allow_html=True)
