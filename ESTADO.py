@@ -82,6 +82,12 @@ if opcion=='Analisis general':
         datos_i_e=datos.loc[:,["Fecha","Tipo de transacción","Monto"]]
         tabla_i_e=datos_i_e.pivot_table(index="Tipo de transacción", values="Monto", aggfunc= lambda x:sum(x))
         col2.write(tabla_i_e)
+        suma=tabla_i_e.values.sum()
+        if suma<=0:
+             r="en contra"
+        else:
+             r="a favor"
+        col2.write(f"Resultado {r} de {suma}")
 if opcion=='Analisis por dia':
         #Ingresos y egresos por día     
         fechas=datos["Fecha"].unique()
