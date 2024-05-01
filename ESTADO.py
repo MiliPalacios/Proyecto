@@ -25,7 +25,7 @@ st.write("Esta app fue hecha con el fin de facilitar los procedimientos internos
 #    datos = pd.read_excel(archivo_base)    
 
     #Transformar datos de fecha a datos de tiempo
-datos=pd.read_excel("datasets\Movimiento.xlsx")
+datos=pd.read_excel("datasets/Movimiento.xlsx")
 for i in range (len(datos.index)) :
     datos["Fecha"][i]=pd.to_datetime(f.texto_a_fechas(datos["Fecha"][i])) 
 datos=datos.fillna(int("0"))
