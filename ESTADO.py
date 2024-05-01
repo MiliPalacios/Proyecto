@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from io import BytesIO
-import Proyecto.sources.funciones as f
+import sources.funciones as f
 from pages import pag1,pag2
 import matplotlib.pyplot as plt
 from openpyxl import Workbook
