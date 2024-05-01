@@ -87,7 +87,7 @@ if opcion=='Analisis general':
              r="en contra"
         else:
              r="a favor"
-        col2.write(f"Resultado {r} de {suma}")
+        col2.info(f"Resultado {r} de {suma}")
 if opcion=='Analisis por dia':
         #Ingresos y egresos por día     
         fechas=datos["Fecha"].unique()
