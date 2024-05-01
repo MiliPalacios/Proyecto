@@ -11,16 +11,8 @@ from openpyxl.drawing.image import Image as image
 from PIL import Image
 from fpdf import FPDF
 import base64
-#st.sidebar.header("Paginas")
-#pages={
-#    "Extra1": pag1,
-#    "Extra2":pag2
-#}
-#selection=st.sidebar.radio("Ir a",list(pages.keys()))
-#page=pages[selection]
 st.title("RESUMEN ESTADO DE CUENTA")
 st.write("Esta app fue hecha con el fin de facilitar los procedimientos internos en la tesoreria de un conjunto de residencias")
-#st.warning("APP AUN DESARROLLANDOSE: no exite contenido en las paginas anexas")
 # Subir base desde el computador
 #try:
 #    archivo_base = st.file_uploader('Subir base de datos',type=['xlsx'])
@@ -31,6 +23,7 @@ st.write("Esta app fue hecha con el fin de facilitar los procedimientos internos
 #    st.success("Archivo subido correctamente",icon="✅")
     # Lectura de la base
 #    datos = pd.read_excel(archivo_base)    
+
     #Transformar datos de fecha a datos de tiempo
 datos=pd.read_excel("datasets\Movimiento.xlsx")
 for i in range (len(datos.index)) :
