@@ -90,7 +90,6 @@ if opcion=='Analisis por dia':
         col1,col2=st.columns(2)
        #Ingresos y egresos por día     
         col1.subheader('TRANSACCIONES')
-        col1.info("Seccion en CORRECCION: dias 0")
         col1.info("Para ejemplo rápido seleccionar: 2024-01-03")
         datos_d=datos_i_e[datos_i_e["Fecha"].isin([fecha])]
         tabla_d=datos_d.pivot_table(index="Tipo de transacción",columns="Fecha", values="Monto", aggfunc= lambda x:sum(x))
